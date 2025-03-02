@@ -1,12 +1,15 @@
 #pragma once
 #include <JuceHeader.h>
+#include "WaveformDisplay.h"
 
 class DeckGUI : public juce::Component,
                 public juce::Button::Listener,
                 public juce::Slider::Listener
 {
 public:
-    DeckGUI(int _id);
+    DeckGUI(int _id,
+            juce::AudioFormatManager & formatManagerToUse,
+            juce::AudioThumbnailCache & cacheToUse);
     ~DeckGUI() override;
 
     void paint(juce::Graphics&) override;
@@ -36,6 +39,7 @@ private:
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
     juce::ResamplingAudioSource resampleSource{&transportSource, false, 2};
+    WaveformDisplay waveformDisplay;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeckGUI)
 };

@@ -1,10 +1,13 @@
 #include "DeckGUI.h"
 
-DeckGUI::DeckGUI(int _id) : id(_id)
+DeckGUI::DeckGUI(int _id,
+                 juce::AudioFormatManager & formatManagerToUse,
+                 juce::AudioThumbnailCache & cacheToUse): id(_id), waveformDisplay(formatManagerToUse, cacheToUse)
 {
     addAndMakeVisible(playButton);
     addAndMakeVisible(volumeSlider);
     addAndMakeVisible(speedSlider);
+    addAndMakeVisible(waveformDisplay);
 
     playButton.addListener(this);
     volumeSlider.addListener(this);
@@ -49,6 +52,7 @@ void DeckGUI::resized()
     playButton.setBounds(area.removeFromTop(40).reduced(5));
     volumeSlider.setBounds(area.removeFromTop(40).reduced(5));
     speedSlider.setBounds(area.removeFromTop(40).reduced(5));
+    waveformDisplay.setBounds(area.removeFromTop(80).reduced(5));
 }
 
 void DeckGUI::buttonClicked(juce::Button* button)
@@ -110,6 +114,8 @@ void DeckGUI::loadFile(const juce::File& file)
         readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
         transportSource.setSource(readerSource.get());
         DBG("DeckGUI::loadFile: Successfully loaded file for Deck " << id);
+        juce::URL fileURL(file);
+        waveformDisplay.loadURL(fileURL);
     }
     else
     {

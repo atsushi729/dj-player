@@ -17,8 +17,11 @@ public:
     void resized() override;
 
 private:
-    DeckGUI deck1{1};
-    DeckGUI deck2{2};
+    juce::AudioFormatManager formatManager;
+    juce::AudioThumbnailCache thumCache{100};
+    
+    DeckGUI deck1{1, formatManager, thumCache};
+    DeckGUI deck2{2, formatManager, thumCache};
     MusicLibrary musicLib;
     juce::TextButton loadButton{"Load Track"};
     juce::TextButton addButton{"Add Track"};

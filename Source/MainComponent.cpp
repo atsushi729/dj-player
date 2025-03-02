@@ -17,6 +17,8 @@ MainComponent::MainComponent()
     
     setSize(800, 600);
     setAudioChannels(0, 2);
+    
+    formatManager.registerBasicFormats();
 }
 
 MainComponent::~MainComponent()
