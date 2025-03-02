@@ -26,14 +26,19 @@ DeckGUI::~DeckGUI()
 
 void DeckGUI::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::black);
-    
+    g.fillAll(juce::Colours::darkgrey);
+
     auto bounds = getLocalBounds().reduced(10);
-    g.setColour(juce::Colours::red);
-    g.drawRoundedRectangle(bounds.toFloat(), 10.0f, 2.0f);
-    
-    g.setColour(juce::Colours::yellowgreen);
-    g.fillRect(bounds.removeFromTop(200));
+
+    // Draw turntable
+    auto turntableBounds = bounds.removeFromTop(bounds.getHeight() - 100).withSizeKeepingCentre(200, 200);
+    g.setColour(juce::Colours::black);  // Vinyl color
+    g.fillEllipse(turntableBounds.toFloat());
+    g.setColour(juce::Colours::red);  // Rim color
+    g.drawEllipse(turntableBounds.toFloat(), 5.0f);
+    g.setColour(juce::Colours::white);  // Center label
+    auto center = turntableBounds.getCentre();
+    g.fillEllipse(center.getX() - 20, center.getY() - 20, 40, 40);
 }
 
 void DeckGUI::resized()
@@ -48,7 +53,14 @@ void DeckGUI::buttonClicked(juce::Button* button)
 {
     if (button == &playButton)
     {
-        playing ? transportSource.stop() : transportSource.start();
+        if (playing)
+        {
+            transportSource.stop();
+        }
+        else if (readerSource != nullptr)
+        {
+            transportSource.start();
+        }
         playing = !playing;
         playButton.setButtonText(playing ? "Stop" : "Play");
     }
@@ -57,10 +69,13 @@ void DeckGUI::buttonClicked(juce::Button* button)
 void DeckGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)
-        volume = (float)slider->getValue();
-    if (slider == &speedSlider)
+    {
+        volume = static_cast<float>(slider->getValue());
+    }
+    else if (slider == &speedSlider)
+    {
         resampleSource.setResamplingRatio(slider->getValue());
-    
+    }
 }
 
 void DeckGUI::loadFile(const juce::File& file)
@@ -70,6 +85,7 @@ void DeckGUI::loadFile(const juce::File& file)
     {
         readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
         transportSource.setSource(readerSource.get());
+        DBG("Loaded file: " << file.getFullPathName());
     }
 }
 
@@ -82,9 +98,13 @@ void DeckGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     if (playing)
+    {
         resampleSource.getNextAudioBlock(bufferToFill);
+    }
     else
+    {
         bufferToFill.clearActiveBufferRegion();
+    }
 }
 
 void DeckGUI::releaseResources()
