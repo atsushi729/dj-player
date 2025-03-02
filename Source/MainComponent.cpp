@@ -62,14 +62,29 @@ void MainComponent::paint(juce::Graphics& g)
 
 void MainComponent::resized()
 {
-    auto area = getLocalBounds();
-    deck1.setBounds(area.removeFromLeft(getWidth() / 3));
-    deck2.setBounds(area.removeFromLeft(getWidth() / 3));
-    musicLib.setBounds(area);
-    loadButton.setBounds(10, getHeight() - 50, 100, 40);
-    addButton.setBounds(120, getHeight() - 50, 100, 40);
-    loadToDeck1Button.setBounds(230, getHeight() - 50, 100, 40);
-    loadToDeck2Button.setBounds(340, getHeight() - 50, 100, 40);
+    auto area = getLocalBounds().reduced(10); // Padding around edges
+    
+    // Top control bar for buttons
+    auto buttonArea = area.removeFromTop(50);
+    loadButton.setBounds(buttonArea.removeFromLeft(100).reduced(5));
+    addButton.setBounds(buttonArea.removeFromLeft(100).reduced(5));
+    loadToDeck1Button.setBounds(buttonArea.removeFromLeft(100).reduced(5));
+    loadToDeck2Button.setBounds(buttonArea.removeFromLeft(100).reduced(5));
+    
+    // Main content area: Deck1 (left), MusicLibrary (center), Deck2 (right)
+    auto contentArea = area;
+    int totalWidth = contentArea.getWidth();
+    
+    // Allocate 30% for each deck, 40% for music library
+    int deckWidth = totalWidth * 0.3f;
+    int libraryWidth = totalWidth * 0.4f;
+    
+    // Calculate starting x-coordinate for MusicLibrary to center it
+    int libraryX = (totalWidth - libraryWidth) / 2 + contentArea.getX();
+    
+    deck1.setBounds(contentArea.getX(), contentArea.getY(), deckWidth, contentArea.getHeight());
+    musicLib.setBounds(libraryX, contentArea.getY(), libraryWidth, contentArea.getHeight());
+    deck2.setBounds(contentArea.getX() + totalWidth - deckWidth, contentArea.getY(), deckWidth, contentArea.getHeight());
 }
 
 void MainComponent::loadButtonClicked()

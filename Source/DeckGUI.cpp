@@ -35,11 +35,14 @@ void DeckGUI::paint(juce::Graphics& g)
 
     auto bounds = getLocalBounds().reduced(10);
 
+    // Define turntable bounds at the bottom
+    auto turntableHeight = bounds.getHeight() / 2; // Bottom half of the area
+    auto turntableBounds = bounds.removeFromBottom(turntableHeight).withSizeKeepingCentre(200, 200);
+    
     // Draw turntable
-    auto turntableBounds = bounds.removeFromTop(bounds.getHeight() - 100).withSizeKeepingCentre(200, 200);
     g.setColour(juce::Colours::black);  // Vinyl color
     g.fillEllipse(turntableBounds.toFloat());
-    g.setColour(juce::Colours::red);  // Rim color
+    g.setColour(juce::Colours::red);    // Rim color
     g.drawEllipse(turntableBounds.toFloat(), 5.0f);
     g.setColour(juce::Colours::white);  // Center label
     auto center = turntableBounds.getCentre();
