@@ -22,6 +22,8 @@ DeckGUI::~DeckGUI()
 {
     transportSource.stop();
     transportSource.releaseResources();
+    transportSource.setSource(nullptr);
+    readerSource.reset();
 }
 
 void DeckGUI::paint(juce::Graphics& g)
@@ -74,18 +76,44 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
     }
     else if (slider == &speedSlider)
     {
-        resampleSource.setResamplingRatio(slider->getValue());
+        speed = static_cast<float>(slider->getValue());
+        resampleSource.setResamplingRatio(speed);
     }
 }
 
 void DeckGUI::loadFile(const juce::File& file)
 {
+    if (!file.existsAsFile())
+    {
+        DBG("DeckGUI::loadFile: File does not exist for Deck " << id << ": " << file.getFullPathName());
+        return;
+    }
+
+    DBG("DeckGUI::loadFile: Loading file for Deck " << id << ": " << file.getFullPathName());
+
+    // Stop playback and release resources before loading a new file
+    if (playing)
+    {
+        transportSource.stop();
+        playing = false;
+        playButton.setButtonText("Play");
+    }
+
+    // Clear the current source and release resources
+    transportSource.setSource(nullptr);
+    readerSource.reset();
+
+    // Create a new reader and source
     auto* reader = formatManager.createReaderFor(file);
     if (reader != nullptr)
     {
         readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
         transportSource.setSource(readerSource.get());
-        DBG("Loaded file: " << file.getFullPathName());
+        DBG("DeckGUI::loadFile: Successfully loaded file for Deck " << id);
+    }
+    else
+    {
+        DBG("DeckGUI::loadFile: Failed to create reader for file for Deck " << id);
     }
 }
 
@@ -97,7 +125,7 @@ void DeckGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
 void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    if (playing)
+    if (playing && readerSource != nullptr)
     {
         resampleSource.getNextAudioBlock(bufferToFill);
     }
@@ -110,4 +138,5 @@ void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill
 void DeckGUI::releaseResources()
 {
     transportSource.releaseResources();
+    resampleSource.releaseResources();
 }
