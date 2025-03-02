@@ -59,7 +59,8 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
     if (slider == &volumeSlider)
         volume = (float)slider->getValue();
     if (slider == &speedSlider)
-        transportSource.setPosition(transportSource.getCurrentPosition() * speed / (float)slider->getValue());
+        resampleSource.setResamplingRatio(slider->getValue());
+    
 }
 
 void DeckGUI::loadFile(const juce::File& file)
@@ -75,12 +76,13 @@ void DeckGUI::loadFile(const juce::File& file)
 void DeckGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     if (playing)
-        transportSource.getNextAudioBlock(bufferToFill);
+        resampleSource.getNextAudioBlock(bufferToFill);
     else
         bufferToFill.clearActiveBufferRegion();
 }
