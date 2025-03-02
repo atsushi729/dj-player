@@ -20,11 +20,14 @@ public:
     void loadFile(const juce::File& file);
     bool isPlaying() { return playing; }
     
-    // New public audio methods
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
     float getVolume() const { return volume; }
+    double getPosition() const { return transportSource.getCurrentPosition(); }
+
+    // New method to update playhead on the message thread
+    void updatePlayhead();
 
 private:
     int id;

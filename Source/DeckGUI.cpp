@@ -134,11 +134,19 @@ void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill
     if (playing && readerSource != nullptr)
     {
         resampleSource.getNextAudioBlock(bufferToFill);
+        // Post a message to update the playhead on the GUI thread
+        juce::MessageManager::callAsync([this]() { updatePlayhead(); });
     }
     else
     {
         bufferToFill.clearActiveBufferRegion();
     }
+}
+
+void DeckGUI::updatePlayhead()
+{
+    // This runs on the message thread, so it's safe to call setPosition and repaint
+    waveformDisplay.setPosition(transportSource.getCurrentPosition());
 }
 
 void DeckGUI::releaseResources()
