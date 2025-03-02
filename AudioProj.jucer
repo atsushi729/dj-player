@@ -4,6 +4,11 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="UzKVCR" name="AudioProj">
     <GROUP id="{235FE78A-39B5-4AE4-B1FA-5FF12EEAE0F6}" name="Source">
+      <FILE id="IR05Nq" name="DeckGUI.cpp" compile="1" resource="0" file="Source/DeckGUI.cpp"/>
+      <FILE id="XyfGjF" name="DeckGUI.h" compile="0" resource="0" file="Source/DeckGUI.h"/>
+      <FILE id="OPKPaM" name="MusicLibrary.cpp" compile="1" resource="0"
+            file="Source/MusicLibrary.cpp"/>
+      <FILE id="XsSRMs" name="MusicLibrary.h" compile="0" resource="0" file="Source/MusicLibrary.h"/>
       <FILE id="EhumbM" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="QG8etB" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="IOUNed" name="MainComponent.cpp" compile="1" resource="0"

@@ -1,78 +1,124 @@
 #include "MainComponent.h"
 
-//==============================================================================
 MainComponent::MainComponent()
 {
-    // Make sure you set the size of the component after
-    // you add any child components.
-    setSize (800, 600);
-
-    // Some platforms require permissions to open input channels so request that here
-    if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
-        && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))
-    {
-        juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,
-                                           [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });
-    }
-    else
-    {
-        // Specify the number of input and output channels that we want to open
-        setAudioChannels (2, 2);
-    }
+    addAndMakeVisible(deck1);
+    addAndMakeVisible(deck2);
+    addAndMakeVisible(musicLib);
+    addAndMakeVisible(loadButton);
+    addAndMakeVisible(addButton);
+    addAndMakeVisible(loadToDeck1Button);
+    addAndMakeVisible(loadToDeck2Button);
     
-//    addAndMakeVisible(button);
+    loadButton.onClick = [this] { loadButtonClicked(); };
+    addButton.onClick = [this] { addButtonClicked(); };
+    loadToDeck1Button.onClick = [this] { loadToDeck1Clicked(); };
+    loadToDeck2Button.onClick = [this] { loadToDeck2Clicked(); };
+    
+    setSize(800, 600);
+    setAudioChannels(0, 2);
 }
 
 MainComponent::~MainComponent()
 {
-    // This shuts down the audio device and clears the audio source.
     shutdownAudio();
 }
 
-//==============================================================================
-void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
+void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-    // This function will be called when the audio device is started, or when
-    // its settings (i.e. sample rate, block size, etc) are changed.
-
-    // You can use this function to initialise any resources you might need,
-    // but be careful - it will be called on the audio thread, not the GUI thread.
-
-    // For more details, see the help for AudioProcessor::prepareToPlay()
+    deck1.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    deck2.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
-void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
+void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    // Your audio-processing code goes here!
+    juce::AudioBuffer<float> tempBuffer(2, bufferToFill.numSamples);
+    tempBuffer.clear();
 
-    // For more details, see the help for AudioProcessor::getNextAudioBlock()
+    deck1.getNextAudioBlock(bufferToFill);
+    for (int ch = 0; ch < 2; ++ch)
+        tempBuffer.addFrom(ch, 0, *bufferToFill.buffer, ch, 0, bufferToFill.numSamples, deck1.getVolume());
 
-    // Right now we are not producing any data, in which case we need to clear the buffer
-    // (to prevent the output of random noise)
-    bufferToFill.clearActiveBufferRegion();
+    deck2.getNextAudioBlock(bufferToFill);
+    for (int ch = 0; ch < 2; ++ch)
+        tempBuffer.addFrom(ch, 0, *bufferToFill.buffer, ch, 0, bufferToFill.numSamples, deck2.getVolume());
+
+    bufferToFill.buffer->copyFrom(0, 0, tempBuffer.getReadPointer(0), bufferToFill.numSamples);
+    bufferToFill.buffer->copyFrom(1, 0, tempBuffer.getReadPointer(1), bufferToFill.numSamples);
 }
 
 void MainComponent::releaseResources()
 {
-    // This will be called when the audio device stops, or when it is being
-    // restarted due to a setting change.
-
-    // For more details, see the help for AudioProcessor::releaseResources()
+    deck1.releaseResources();
+    deck2.releaseResources();
 }
 
-//==============================================================================
-void MainComponent::paint (juce::Graphics& g)
+void MainComponent::paint(juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    // You can add your drawing code here!
+    g.fillAll(juce::Colours::grey);
 }
 
 void MainComponent::resized()
 {
-    // This is called when the MainContentComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
-//    button.setBounds(0, 0, getWidth(), getHeight() / 2);
+    auto area = getLocalBounds();
+    deck1.setBounds(area.removeFromLeft(getWidth() / 3));
+    deck2.setBounds(area.removeFromLeft(getWidth() / 3));
+    musicLib.setBounds(area);
+    loadButton.setBounds(10, getHeight() - 50, 100, 40);
+    addButton.setBounds(120, getHeight() - 50, 100, 40);
+    loadToDeck1Button.setBounds(230, getHeight() - 50, 100, 40);
+    loadToDeck2Button.setBounds(340, getHeight() - 50, 100, 40);
+}
+
+void MainComponent::loadButtonClicked()
+{
+    juce::File track = musicLib.getSelectedTrack();
+    if (track.exists())
+    {
+        deck1.loadFile(track);
+    }
+}
+
+void MainComponent::addButtonClicked()
+{
+    auto fileChooserFlags = juce::FileBrowserComponent::canSelectFiles;
+    fChooser.launchAsync(fileChooserFlags, [this](const juce::FileChooser& chooser)
+    {
+        juce::File chosenFile = chooser.getResult();
+        if (chosenFile != juce::File())
+        {
+            DBG("Adding file: " << chosenFile.getFullPathName());
+            musicLib.addTrack(chosenFile);
+        }
+    });
+}
+
+void MainComponent::loadToDeck1Clicked()
+{
+    auto fileChooserFlags = juce::FileBrowserComponent::canSelectFiles;
+    fChooser.launchAsync(fileChooserFlags, [this](const juce::FileChooser& chooser)
+    {
+        juce::File chosenFile = chooser.getResult();
+        if (chosenFile != juce::File())
+        {
+            DBG("Loading to Deck 1: " << chosenFile.getFullPathName());
+            deck1.loadFile(chosenFile);
+            musicLib.addTrack(chosenFile);
+        }
+    });
+}
+
+void MainComponent::loadToDeck2Clicked()
+{
+    auto fileChooserFlags = juce::FileBrowserComponent::canSelectFiles;
+    fChooser.launchAsync(fileChooserFlags, [this](const juce::FileChooser& chooser)
+    {
+        juce::File chosenFile = chooser.getResult();
+        if (chosenFile != juce::File())
+        {
+            DBG("Loading to Deck 2: " << chosenFile.getFullPathName());
+            deck2.loadFile(chosenFile);
+            musicLib.addTrack(chosenFile);
+        }
+    });
 }
