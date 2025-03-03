@@ -7,6 +7,7 @@ MusicLibrary::MusicLibrary()
     addAndMakeVisible(trackList);
     addAndMakeVisible(leftArrowButton);
     addAndMakeVisible(addButton);
+    addAndMakeVisible(deleteButton);  // Add delete button
     addAndMakeVisible(rightArrowButton);
     
     searchBox.addListener(this);
@@ -14,6 +15,7 @@ MusicLibrary::MusicLibrary()
     
     leftArrowButton.onClick = [this] { leftArrowClicked(); };
     addButton.onClick = [this] { addButtonClicked(); };
+    deleteButton.onClick = [this] { deleteButtonClicked(); };  // Set up click handler
     rightArrowButton.onClick = [this] { rightArrowClicked(); };
     
     libraryFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
@@ -39,7 +41,8 @@ void MusicLibrary::resized()
     // Button area at bottom
     auto buttonArea = area.removeFromBottom(30);
     leftArrowButton.setBounds(buttonArea.removeFromLeft(30).reduced(2));
-    addButton.setBounds(buttonArea.removeFromLeft(100).reduced(2));
+    addButton.setBounds(buttonArea.removeFromLeft(120).reduced(2));
+    deleteButton.setBounds(buttonArea.removeFromLeft(120).reduced(2));
     rightArrowButton.setBounds(buttonArea.removeFromRight(30).reduced(2));
     
     trackList.setBounds(area);
@@ -194,4 +197,30 @@ void MusicLibrary::addButtonClicked()
             addTrack(chosenFile);
         }
     });
+}
+
+void MusicLibrary::deleteButtonClicked()
+{
+    int selectedRow = trackList.getSelectedRow();
+    if (selectedRow >= 0)
+    {
+        auto searchText = searchBox.getText().toLowerCase();
+        int visibleRow = 0;
+        
+        for (int i = 0; i < tracks.size(); i++)
+        {
+            if (searchText.isEmpty() || tracks[i].getFileName().toLowerCase().contains(searchText))
+            {
+                if (visibleRow == selectedRow)
+                {
+                    DBG("Deleting track: " << tracks[i].getFullPathName());
+                    tracks.remove(i);
+                    trackList.updateContent();
+                    trackList.deselectAllRows();  // Clear selection after deletion
+                    break;
+                }
+                visibleRow++;
+            }
+        }
+    }
 }

@@ -33,14 +33,14 @@ private:
     
     // Buttons
     juce::TextButton leftArrowButton{"<"};
-    juce::TextButton addButton{"Add Track"};  // Moved from MainComponent
+    juce::TextButton addButton{"Add Track"};
+    juce::TextButton deleteButton{"Delete"};
     juce::TextButton rightArrowButton{">"};
     
     // Deck pointers
     DeckGUI* deck1Ptr{nullptr};
     DeckGUI* deck2Ptr{nullptr};
     
-    // File chooser for adding tracks
     juce::FileChooser fChooser{"Choose an audio file",
                               juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
                               "*.mp3;*.wav;*.aiff"};
@@ -50,7 +50,8 @@ private:
     
     void leftArrowClicked();
     void rightArrowClicked();
-    void addButtonClicked();  // New handler
+    void addButtonClicked();
+    void deleteButtonClicked();  // New handler
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MusicLibrary)
 };
