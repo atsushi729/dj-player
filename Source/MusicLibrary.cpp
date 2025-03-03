@@ -1,11 +1,19 @@
 #include "MusicLibrary.h"
+#include "DeckGUI.h"  // Include DeckGUI header for the pointer types
 
 MusicLibrary::MusicLibrary()
 {
     addAndMakeVisible(searchBox);
     addAndMakeVisible(trackList);
+    addAndMakeVisible(leftArrowButton);
+    addAndMakeVisible(rightArrowButton);
+    
     searchBox.addListener(this);
     trackList.setModel(this);
+    
+    leftArrowButton.onClick = [this] { leftArrowClicked(); };
+    rightArrowButton.onClick = [this] { rightArrowClicked(); };
+    
     libraryFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
         .getChildFile("dj_library.xml");
     loadLibrary();
@@ -25,6 +33,12 @@ void MusicLibrary::resized()
 {
     auto area = getLocalBounds().reduced(5);
     searchBox.setBounds(area.removeFromTop(30));
+    
+    // Add buttons at the bottom
+    auto buttonArea = area.removeFromBottom(30);
+    leftArrowButton.setBounds(buttonArea.removeFromLeft(30).reduced(2));
+    rightArrowButton.setBounds(buttonArea.removeFromRight(30).reduced(2));
+    
     trackList.setBounds(area);
 }
 
@@ -138,5 +152,29 @@ void MusicLibrary::saveLibrary()
     if (!xml.writeTo(libraryFile))
     {
         DBG("Failed to save music library to " << libraryFile.getFullPathName());
+    }
+}
+
+void MusicLibrary::setDecks(DeckGUI* deck1, DeckGUI* deck2)
+{
+    deck1Ptr = deck1;
+    deck2Ptr = deck2;
+}
+
+void MusicLibrary::leftArrowClicked()
+{
+    juce::File selectedTrack = getSelectedTrack();
+    if (selectedTrack.exists() && deck1Ptr != nullptr)
+    {
+        deck1Ptr->loadFile(selectedTrack);
+    }
+}
+
+void MusicLibrary::rightArrowClicked()
+{
+    juce::File selectedTrack = getSelectedTrack();
+    if (selectedTrack.exists() && deck2Ptr != nullptr)
+    {
+        deck2Ptr->loadFile(selectedTrack);
     }
 }

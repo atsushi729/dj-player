@@ -15,6 +15,9 @@ MainComponent::MainComponent()
     loadToDeck1Button.onClick = [this] { loadToDeck1Clicked(); };
     loadToDeck2Button.onClick = [this] { loadToDeck2Clicked(); };
     
+    // Add this line to set the deck pointers
+    musicLib.setDecks(&deck1, &deck2);
+    
     setSize(800, 600);
     setAudioChannels(0, 2);
     
