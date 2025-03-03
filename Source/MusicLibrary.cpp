@@ -1,17 +1,19 @@
 #include "MusicLibrary.h"
-#include "DeckGUI.h"  // Include DeckGUI header for the pointer types
+#include "DeckGUI.h"
 
 MusicLibrary::MusicLibrary()
 {
     addAndMakeVisible(searchBox);
     addAndMakeVisible(trackList);
     addAndMakeVisible(leftArrowButton);
+    addAndMakeVisible(addButton);
     addAndMakeVisible(rightArrowButton);
     
     searchBox.addListener(this);
     trackList.setModel(this);
     
     leftArrowButton.onClick = [this] { leftArrowClicked(); };
+    addButton.onClick = [this] { addButtonClicked(); };
     rightArrowButton.onClick = [this] { rightArrowClicked(); };
     
     libraryFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
@@ -34,9 +36,10 @@ void MusicLibrary::resized()
     auto area = getLocalBounds().reduced(5);
     searchBox.setBounds(area.removeFromTop(30));
     
-    // Add buttons at the bottom
+    // Button area at bottom
     auto buttonArea = area.removeFromBottom(30);
     leftArrowButton.setBounds(buttonArea.removeFromLeft(30).reduced(2));
+    addButton.setBounds(buttonArea.removeFromLeft(100).reduced(2));
     rightArrowButton.setBounds(buttonArea.removeFromRight(30).reduced(2));
     
     trackList.setBounds(area);
@@ -177,4 +180,18 @@ void MusicLibrary::rightArrowClicked()
     {
         deck2Ptr->loadFile(selectedTrack);
     }
+}
+
+void MusicLibrary::addButtonClicked()
+{
+    auto fileChooserFlags = juce::FileBrowserComponent::canSelectFiles;
+    fChooser.launchAsync(fileChooserFlags, [this](const juce::FileChooser& chooser)
+    {
+        juce::File chosenFile = chooser.getResult();
+        if (chosenFile != juce::File())
+        {
+            DBG("Adding file: " << chosenFile.getFullPathName());
+            addTrack(chosenFile);
+        }
+    });
 }

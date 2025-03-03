@@ -6,12 +6,10 @@ MainComponent::MainComponent()
     addAndMakeVisible(deck2);
     addAndMakeVisible(musicLib);
     addAndMakeVisible(loadButton);
-    addAndMakeVisible(addButton);
     addAndMakeVisible(loadToDeck1Button);
     addAndMakeVisible(loadToDeck2Button);
     
     loadButton.onClick = [this] { loadButtonClicked(); };
-    addButton.onClick = [this] { addButtonClicked(); };
     loadToDeck1Button.onClick = [this] { loadToDeck1Clicked(); };
     loadToDeck2Button.onClick = [this] { loadToDeck2Clicked(); };
     
@@ -70,7 +68,6 @@ void MainComponent::resized()
     // Top control bar for buttons
     auto buttonArea = area.removeFromTop(50);
     loadButton.setBounds(buttonArea.removeFromLeft(100).reduced(5));
-    addButton.setBounds(buttonArea.removeFromLeft(100).reduced(5));
     loadToDeck1Button.setBounds(buttonArea.removeFromLeft(100).reduced(5));
     loadToDeck2Button.setBounds(buttonArea.removeFromLeft(100).reduced(5));
     
@@ -97,20 +94,6 @@ void MainComponent::loadButtonClicked()
     {
         deck1.loadFile(track);
     }
-}
-
-void MainComponent::addButtonClicked()
-{
-    auto fileChooserFlags = juce::FileBrowserComponent::canSelectFiles;
-    fChooser.launchAsync(fileChooserFlags, [this](const juce::FileChooser& chooser)
-    {
-        juce::File chosenFile = chooser.getResult();
-        if (chosenFile != juce::File())
-        {
-            DBG("Adding file: " << chosenFile.getFullPathName());
-            musicLib.addTrack(chosenFile);
-        }
-    });
 }
 
 void MainComponent::loadToDeck1Clicked()

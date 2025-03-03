@@ -23,7 +23,6 @@ public:
     juce::File getSelectedTrack();
     void addTrack(const juce::File& file);
     
-    // New methods to set deck pointers
     void setDecks(DeckGUI* deck1, DeckGUI* deck2);
 
 private:
@@ -32,20 +31,26 @@ private:
     juce::Array<juce::File> tracks;
     juce::File libraryFile;
     
-    // New arrow buttons
-    juce::TextButton leftArrowButton{"<"};  // Load to Deck 1
-    juce::TextButton rightArrowButton{">"}; // Load to Deck 2
+    // Buttons
+    juce::TextButton leftArrowButton{"<"};
+    juce::TextButton addButton{"Add Track"};  // Moved from MainComponent
+    juce::TextButton rightArrowButton{">"};
     
-    // Pointers to decks
+    // Deck pointers
     DeckGUI* deck1Ptr{nullptr};
     DeckGUI* deck2Ptr{nullptr};
+    
+    // File chooser for adding tracks
+    juce::FileChooser fChooser{"Choose an audio file",
+                              juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
+                              "*.mp3;*.wav;*.aiff"};
     
     void loadLibrary();
     void saveLibrary();
     
-    // New button click handlers
     void leftArrowClicked();
     void rightArrowClicked();
+    void addButtonClicked();  // New handler
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MusicLibrary)
 };

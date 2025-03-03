@@ -24,7 +24,6 @@ private:
     DeckGUI deck2{2, formatManager, thumCache};
     MusicLibrary musicLib;
     juce::TextButton loadButton{"Load Track"};
-    juce::TextButton addButton{"Add Track"};
     juce::TextButton loadToDeck1Button{"Load to Deck 1"};
     juce::TextButton loadToDeck2Button{"Load to Deck 2"};
 
