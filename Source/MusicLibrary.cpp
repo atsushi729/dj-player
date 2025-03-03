@@ -7,15 +7,16 @@ MusicLibrary::MusicLibrary()
     addAndMakeVisible(trackList);
     addAndMakeVisible(leftArrowButton);
     addAndMakeVisible(addButton);
-    addAndMakeVisible(deleteButton);  // Add delete button
+    addAndMakeVisible(deleteButton);
     addAndMakeVisible(rightArrowButton);
     
     searchBox.addListener(this);
     trackList.setModel(this);
     
+    searchBox.setTextToShowWhenEmpty("Search tracks...", juce::Colours::grey);
     leftArrowButton.onClick = [this] { leftArrowClicked(); };
     addButton.onClick = [this] { addButtonClicked(); };
-    deleteButton.onClick = [this] { deleteButtonClicked(); };  // Set up click handler
+    deleteButton.onClick = [this] { deleteButtonClicked(); };
     rightArrowButton.onClick = [this] { rightArrowClicked(); };
     
     libraryFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
@@ -216,7 +217,7 @@ void MusicLibrary::deleteButtonClicked()
                     DBG("Deleting track: " << tracks[i].getFullPathName());
                     tracks.remove(i);
                     trackList.updateContent();
-                    trackList.deselectAllRows();  // Clear selection after deletion
+                    trackList.deselectAllRows();
                     break;
                 }
                 visibleRow++;
