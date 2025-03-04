@@ -51,7 +51,10 @@ void MainComponent::releaseResources()
 
 void MainComponent::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::grey);
+    juce::ColourGradient bgGradient(juce::Colours::grey.darker(0.5f), 0, 0,
+                                   juce::Colours::grey.brighter(0.3f), getWidth(), getHeight(), false);
+    g.setGradientFill(bgGradient);
+    g.fillAll();
 }
 
 void MainComponent::resized()

@@ -40,7 +40,12 @@ MusicLibrary::~MusicLibrary()
 
 void MusicLibrary::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::lightgrey);
+    juce::ColourGradient gradient(juce::Colours::lightgrey.brighter(0.1f), 0, 0,
+                                 juce::Colours::lightgrey.darker(0.3f), 0, getHeight(), false);
+    g.setGradientFill(gradient);
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 10.0f); // Rounded corners
+    g.setColour(juce::Colours::grey.darker(0.5f));
+    g.drawRoundedRectangle(getLocalBounds().toFloat(), 10.0f, 2.0f); // Border
 }
 
 void MusicLibrary::resized()
@@ -102,9 +107,10 @@ void MusicLibrary::paintListBoxItem(int rowNumber, juce::Graphics& g, int width,
         {
             if (visibleRow == rowNumber)
             {
-                g.fillAll(rowIsSelected ? juce::Colours::lightblue : juce::Colours::white);
+                g.fillAll(rowIsSelected ? juce::Colours::lightblue : (rowNumber % 2 == 0 ? juce::Colours::white : juce::Colours::lightgrey.brighter(0.5f)));
                 g.setColour(juce::Colours::black);
-                g.drawText(tracks[i].getFileName(), 5, 0, width - 10, height, juce::Justification::centredLeft);
+                g.setFont(juce::FontOptions(16.0f));
+                g.drawText(tracks[i].getFileName(), 10, 0, width - 20, height, juce::Justification::centredLeft);
                 break;
             }
             visibleRow++;

@@ -31,22 +31,40 @@ DeckGUI::~DeckGUI()
 
 void DeckGUI::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::darkgrey);
+    // Gradient background
+    juce::ColourGradient bgGradient(juce::Colours::darkgrey.darker(0.5f), 0, 0,
+                                   juce::Colours::darkgrey.brighter(0.2f), getWidth(), getHeight(), false);
+    g.setGradientFill(bgGradient);
+    g.fillAll();
 
     auto bounds = getLocalBounds().reduced(10);
-
-    // Define turntable bounds at the bottom
-    auto turntableHeight = bounds.getHeight() / 2; // Bottom half of the area
+    auto turntableHeight = bounds.getHeight() / 2;
     auto turntableBounds = bounds.removeFromBottom(turntableHeight).withSizeKeepingCentre(200, 200);
-    
-    // Draw turntable
-    g.setColour(juce::Colours::black);  // Vinyl color
+
+    // Add shadow under turntable
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.fillEllipse(turntableBounds.toFloat().translated(5.0f, 5.0f)); // Shadow offset
+
+    // Vinyl with gradient
+    juce::ColourGradient vinylGradient(juce::Colours::black, turntableBounds.getCentreX(), turntableBounds.getCentreY(),
+                                      juce::Colours::grey.darker(0.5f), turntableBounds.getRight(), turntableBounds.getBottom(), true);
+    g.setGradientFill(vinylGradient);
     g.fillEllipse(turntableBounds.toFloat());
-    g.setColour(juce::Colours::red);    // Rim color
+
+    // Rim with metallic effect
+    g.setColour(juce::Colours::red.brighter(0.2f));
     g.drawEllipse(turntableBounds.toFloat(), 5.0f);
-    g.setColour(juce::Colours::white);  // Center label
+
+    // Center label with rotation animation when playing
+    g.setColour(juce::Colours::white);
     auto center = turntableBounds.getCentre();
-    g.fillEllipse(center.getX() - 20, center.getY() - 20, 40, 40);
+    g.saveState();
+    if (playing) {
+        float angle = static_cast<float>(juce::Time::getMillisecondCounterHiRes() * 0.001 * speed) * 360.0f;
+        g.addTransform(juce::AffineTransform::rotation(juce::degreesToRadians(angle), center.x, center.y));
+    }
+    g.fillEllipse(center.x - 20, center.y - 20, 40, 40);
+    g.restoreState();
 }
 
 void DeckGUI::resized()
