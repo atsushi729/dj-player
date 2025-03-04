@@ -23,18 +23,10 @@ private:
     DeckGUI deck1{1, formatManager, thumCache};
     DeckGUI deck2{2, formatManager, thumCache};
     MusicLibrary musicLib;
-    juce::TextButton loadButton{"Load Track"};
-    juce::TextButton loadToDeck1Button{"Load to Deck 1"};
-    juce::TextButton loadToDeck2Button{"Load to Deck 2"};
 
     juce::FileChooser fChooser{"Choose an audio file",
                               juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
                               "*.mp3;*.wav;*.aiff"};
-
-    void loadButtonClicked();
-    void addButtonClicked();
-    void loadToDeck1Clicked();
-    void loadToDeck2Clicked();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
