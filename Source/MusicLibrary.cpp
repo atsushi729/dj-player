@@ -9,15 +9,24 @@ MusicLibrary::MusicLibrary()
     addAndMakeVisible(addButton);
     addAndMakeVisible(deleteButton);
     addAndMakeVisible(rightArrowButton);
+    addAndMakeVisible(crossfaderSlider);
     
     searchBox.addListener(this);
     trackList.setModel(this);
+    crossfaderSlider.addListener(this);
     
     searchBox.setTextToShowWhenEmpty("Search tracks...", juce::Colours::grey);
+    
     leftArrowButton.onClick = [this] { leftArrowClicked(); };
     addButton.onClick = [this] { addButtonClicked(); };
     deleteButton.onClick = [this] { deleteButtonClicked(); };
     rightArrowButton.onClick = [this] { rightArrowClicked(); };
+    
+    // Configure crossfader slider
+    crossfaderSlider.setRange(0.0, 1.0);
+    crossfaderSlider.setValue(0.5);  // Center position by default
+    crossfaderSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+    crossfaderSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     
     libraryFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
         .getChildFile("dj_library.xml");
@@ -39,12 +48,16 @@ void MusicLibrary::resized()
     auto area = getLocalBounds().reduced(5);
     searchBox.setBounds(area.removeFromTop(30));
     
-    // Button area at bottom
-    auto buttonArea = area.removeFromBottom(30);
+    // Button and slider area at bottom
+    auto controlArea = area.removeFromBottom(60);  // Increased height to fit slider
+    auto buttonArea = controlArea.removeFromTop(30);
     leftArrowButton.setBounds(buttonArea.removeFromLeft(30).reduced(2));
     addButton.setBounds(buttonArea.removeFromLeft(120).reduced(2));
     deleteButton.setBounds(buttonArea.removeFromLeft(120).reduced(2));
     rightArrowButton.setBounds(buttonArea.removeFromRight(30).reduced(2));
+    
+    // Crossfader slider below buttons
+    crossfaderSlider.setBounds(controlArea.reduced(5, 2));
     
     trackList.setBounds(area);
 }
@@ -52,6 +65,17 @@ void MusicLibrary::resized()
 void MusicLibrary::textEditorTextChanged(juce::TextEditor&)
 {
     trackList.updateContent();
+}
+
+void MusicLibrary::sliderValueChanged(juce::Slider* slider)
+{
+    if (slider == &crossfaderSlider && deck1Ptr != nullptr && deck2Ptr != nullptr)
+    {
+        float value = static_cast<float>(crossfaderSlider.getValue());
+        // Left (0.0) = full Deck 1, Right (1.0) = full Deck 2
+        deck1Ptr->getVolume() = 1.0f - value;  // Inverse for Deck 1
+        deck2Ptr->getVolume() = value;         // Direct for Deck 2
+    }
 }
 
 int MusicLibrary::getNumRows()
@@ -166,6 +190,12 @@ void MusicLibrary::setDecks(DeckGUI* deck1, DeckGUI* deck2)
 {
     deck1Ptr = deck1;
     deck2Ptr = deck2;
+    // Initialize volumes based on default slider position
+    if (deck1Ptr && deck2Ptr)
+    {
+        deck1Ptr->getVolume() = 0.5f;
+        deck2Ptr->getVolume() = 0.5f;
+    }
 }
 
 void MusicLibrary::leftArrowClicked()

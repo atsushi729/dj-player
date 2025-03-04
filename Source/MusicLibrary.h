@@ -5,7 +5,8 @@ class DeckGUI;  // Forward declaration
 
 class MusicLibrary : public juce::Component,
                      public juce::TextEditor::Listener,
-                     public juce::ListBoxModel
+                     public juce::ListBoxModel,
+                     public juce::Slider::Listener
 {
 public:
     MusicLibrary();
@@ -14,6 +15,7 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     void textEditorTextChanged(juce::TextEditor&) override;
+    void sliderValueChanged(juce::Slider* slider) override;
 
     // ListBoxModel methods
     int getNumRows() override;
@@ -37,6 +39,9 @@ private:
     juce::TextButton deleteButton{"Delete"};
     juce::TextButton rightArrowButton{">"};
     
+    // New crossfader slider
+    juce::Slider crossfaderSlider;
+    
     // Deck pointers
     DeckGUI* deck1Ptr{nullptr};
     DeckGUI* deck2Ptr{nullptr};
@@ -51,7 +56,7 @@ private:
     void leftArrowClicked();
     void rightArrowClicked();
     void addButtonClicked();
-    void deleteButtonClicked();  // New handler
+    void deleteButtonClicked();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MusicLibrary)
 };
