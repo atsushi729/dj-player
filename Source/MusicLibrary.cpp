@@ -40,12 +40,21 @@ MusicLibrary::~MusicLibrary()
 
 void MusicLibrary::paint(juce::Graphics& g)
 {
-    juce::ColourGradient gradient(juce::Colours::lightgrey.brighter(0.1f), 0, 0,
-                                 juce::Colours::lightgrey.darker(0.3f), 0, getHeight(), false);
+    juce::ColourGradient gradient(
+        juce::Colours::lightgrey.brighter(0.2f), 0, 0,
+        juce::Colours::lightgrey.darker(0.1f), 0, getHeight(),
+        false);
+    gradient.addColour(0.7, juce::Colours::lightgrey);
     g.setGradientFill(gradient);
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), 10.0f); // Rounded corners
-    g.setColour(juce::Colours::grey.darker(0.5f));
-    g.drawRoundedRectangle(getLocalBounds().toFloat(), 10.0f, 2.0f); // Border
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 12.0f);
+
+    // Add a subtle glow effect around edges
+    g.setColour(juce::Colours::white.withAlpha(0.1f));
+    g.drawRoundedRectangle(getLocalBounds().reduced(1).toFloat(), 12.0f, 3.0f);
+
+    // Stronger border for definition
+    g.setColour(juce::Colours::grey.darker(0.7f).withAlpha(0.8f));
+    g.drawRoundedRectangle(getLocalBounds().toFloat(), 12.0f, 1.5f);
 }
 
 void MusicLibrary::resized()

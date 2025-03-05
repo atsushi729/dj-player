@@ -31,31 +31,43 @@ DeckGUI::~DeckGUI()
 
 void DeckGUI::paint(juce::Graphics& g)
 {
-    // Gradient background
-    juce::ColourGradient bgGradient(juce::Colours::darkgrey.darker(0.5f), 0, 0,
-                                   juce::Colours::darkgrey.brighter(0.2f), getWidth(), getHeight(), false);
+    // Linear gradient with a metallic, DJ-console feel
+    juce::ColourGradient bgGradient(
+        juce::Colours::black.brighter(0.1f), 0, 0,
+        juce::Colours::darkgrey.darker(0.3f), 0, getHeight(),
+        false);
+    bgGradient.addColour(0.3, juce::Colours::grey.darker(0.2f));
     g.setGradientFill(bgGradient);
-    g.fillAll();
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 8.0f);
 
+    g.setColour(juce::Colours::grey.withAlpha(0.05f));
+    for (int i = 0; i < 100; ++i)
+    {
+        float x = juce::Random::getSystemRandom().nextFloat() * getWidth();
+        float y = juce::Random::getSystemRandom().nextFloat() * getHeight();
+        g.fillRect(x, y, 1.0f, 1.0f);
+    }
+
+    // Subtle inner shadow for depth
+    g.setColour(juce::Colours::black.withAlpha(0.2f));
+    g.drawRoundedRectangle(getLocalBounds().reduced(2).toFloat(), 8.0f, 2.0f);
+
+    // Existing turntable drawing code
     auto bounds = getLocalBounds().reduced(10);
     auto turntableHeight = bounds.getHeight() / 2;
     auto turntableBounds = bounds.removeFromBottom(turntableHeight).withSizeKeepingCentre(200, 200);
 
-    // Add shadow under turntable
     g.setColour(juce::Colours::black.withAlpha(0.3f));
-    g.fillEllipse(turntableBounds.toFloat().translated(5.0f, 5.0f)); // Shadow offset
+    g.fillEllipse(turntableBounds.toFloat().translated(5.0f, 5.0f));
 
-    // Vinyl with gradient
     juce::ColourGradient vinylGradient(juce::Colours::black, turntableBounds.getCentreX(), turntableBounds.getCentreY(),
                                       juce::Colours::grey.darker(0.5f), turntableBounds.getRight(), turntableBounds.getBottom(), true);
     g.setGradientFill(vinylGradient);
     g.fillEllipse(turntableBounds.toFloat());
 
-    // Rim with metallic effect
     g.setColour(juce::Colours::red.brighter(0.2f));
     g.drawEllipse(turntableBounds.toFloat(), 5.0f);
 
-    // Center label with rotation animation when playing
     g.setColour(juce::Colours::white);
     auto center = turntableBounds.getCentre();
     g.saveState();

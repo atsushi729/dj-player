@@ -51,10 +51,17 @@ void MainComponent::releaseResources()
 
 void MainComponent::paint(juce::Graphics& g)
 {
-    juce::ColourGradient bgGradient(juce::Colours::grey.darker(0.5f), 0, 0,
-                                   juce::Colours::grey.brighter(0.3f), getWidth(), getHeight(), false);
+    // Subtle radial gradient for a modern, centered focus
+    juce::ColourGradient bgGradient(
+        juce::Colours::darkgrey.darker(0.8f), getWidth() / 2.0f, getHeight() / 2.0f,
+        juce::Colours::darkgrey.brighter(0.2f), 0, 0,
+        true);
+    bgGradient.addColour(0.5, juce::Colours::darkgrey);
     g.setGradientFill(bgGradient);
     g.fillAll();
+
+    g.setColour(juce::Colours::grey.darker(0.5f).withAlpha(0.5f));
+    g.drawRect(getLocalBounds().toFloat(), 1.0f);
 }
 
 void MainComponent::resized()
