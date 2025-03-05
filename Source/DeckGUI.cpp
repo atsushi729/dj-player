@@ -1,8 +1,9 @@
 #include "DeckGUI.h"
 
 DeckGUI::DeckGUI(int _id,
-                 juce::AudioFormatManager & formatManagerToUse,
-                 juce::AudioThumbnailCache & cacheToUse): id(_id), waveformDisplay(formatManagerToUse, cacheToUse)
+                 juce::AudioFormatManager& formatManagerToUse,
+                 juce::AudioThumbnailCache& cacheToUse)
+    : id(_id), waveformDisplay(formatManagerToUse, cacheToUse)
 {
     addAndMakeVisible(playButton);
     addAndMakeVisible(volumeSlider);
@@ -19,6 +20,10 @@ DeckGUI::DeckGUI(int _id,
     speedSlider.setValue(1.0);
 
     formatManager.registerBasicFormats();
+
+    waveformDisplay.onPositionClicked = [this](double position) {
+        setTransportPosition(position);
+    };
 }
 
 DeckGUI::~DeckGUI()
@@ -31,7 +36,6 @@ DeckGUI::~DeckGUI()
 
 void DeckGUI::paint(juce::Graphics& g)
 {
-    // Linear gradient with a metallic, DJ-console feel
     juce::ColourGradient bgGradient(
         juce::Colours::black.brighter(0.1f), 0, 0,
         juce::Colours::darkgrey.darker(0.3f), 0, getHeight(),
@@ -48,11 +52,9 @@ void DeckGUI::paint(juce::Graphics& g)
         g.fillRect(x, y, 1.0f, 1.0f);
     }
 
-    // Subtle inner shadow for depth
     g.setColour(juce::Colours::black.withAlpha(0.2f));
     g.drawRoundedRectangle(getLocalBounds().reduced(2).toFloat(), 8.0f, 2.0f);
 
-    // Existing turntable drawing code
     auto bounds = getLocalBounds().reduced(10);
     auto turntableHeight = bounds.getHeight() / 2;
     auto turntableBounds = bounds.removeFromBottom(turntableHeight).withSizeKeepingCentre(200, 200);
@@ -122,13 +124,9 @@ void DeckGUI::loadFile(const juce::File& file)
 {
     if (!file.existsAsFile())
     {
-        DBG("DeckGUI::loadFile: File does not exist for Deck " << id << ": " << file.getFullPathName());
         return;
     }
 
-    DBG("DeckGUI::loadFile: Loading file for Deck " << id << ": " << file.getFullPathName());
-
-    // Stop playback and release resources before loading a new file
     if (playing)
     {
         transportSource.stop();
@@ -136,23 +134,16 @@ void DeckGUI::loadFile(const juce::File& file)
         playButton.setButtonText("Play");
     }
 
-    // Clear the current source and release resources
     transportSource.setSource(nullptr);
     readerSource.reset();
 
-    // Create a new reader and source
     auto* reader = formatManager.createReaderFor(file);
     if (reader != nullptr)
     {
         readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
         transportSource.setSource(readerSource.get());
-        DBG("DeckGUI::loadFile: Successfully loaded file for Deck " << id);
         juce::URL fileURL(file);
         waveformDisplay.loadURL(fileURL);
-    }
-    else
-    {
-        DBG("DeckGUI::loadFile: Failed to create reader for file for Deck " << id);
     }
 }
 
@@ -167,7 +158,6 @@ void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill
     if (playing && readerSource != nullptr)
     {
         resampleSource.getNextAudioBlock(bufferToFill);
-        // Post a message to update the playhead on the GUI thread
         juce::MessageManager::callAsync([this]() { updatePlayhead(); });
     }
     else
@@ -178,7 +168,6 @@ void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill
 
 void DeckGUI::updatePlayhead()
 {
-    // This runs on the message thread, so it's safe to call setPosition and repaint
     waveformDisplay.setPosition(transportSource.getCurrentPosition());
 }
 
@@ -186,4 +175,13 @@ void DeckGUI::releaseResources()
 {
     transportSource.releaseResources();
     resampleSource.releaseResources();
+}
+
+void DeckGUI::setTransportPosition(double positionInSeconds)
+{
+    if (readerSource != nullptr)
+    {
+        transportSource.setPosition(positionInSeconds);
+        waveformDisplay.setPosition(positionInSeconds);
+    }
 }

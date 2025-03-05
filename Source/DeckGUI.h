@@ -8,8 +8,8 @@ class DeckGUI : public juce::Component,
 {
 public:
     DeckGUI(int _id,
-            juce::AudioFormatManager & formatManagerToUse,
-            juce::AudioThumbnailCache & cacheToUse);
+            juce::AudioFormatManager& formatManagerToUse,
+            juce::AudioThumbnailCache& cacheToUse);
     ~DeckGUI() override;
 
     void paint(juce::Graphics&) override;
@@ -28,6 +28,7 @@ public:
     double getPosition() const { return transportSource.getCurrentPosition(); }
 
     void updatePlayhead();
+    void setTransportPosition(double positionInSeconds);
 
 private:
     int id;
