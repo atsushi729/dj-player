@@ -39,6 +39,8 @@ private:
     juce::TextButton playButton{"Play"};
     juce::Slider volumeSlider;
     juce::Slider speedSlider;
+    juce::Label volumeLabel;
+    juce::Label speedLabel;  
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;

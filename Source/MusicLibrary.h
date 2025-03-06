@@ -33,16 +33,14 @@ private:
     juce::Array<juce::File> tracks;
     juce::File libraryFile;
     
-    // Buttons
     juce::TextButton leftArrowButton{"<"};
     juce::TextButton addButton{"Add Track"};
     juce::TextButton deleteButton{"Delete"};
     juce::TextButton rightArrowButton{">"};
     
-    // New crossfader slider
     juce::Slider crossfaderSlider;
+    juce::Label crossfaderLabel;  // Label for crossfader
     
-    // Deck pointers
     DeckGUI* deck1Ptr{nullptr};
     DeckGUI* deck2Ptr{nullptr};
     

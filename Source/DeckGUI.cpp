@@ -9,6 +9,8 @@ DeckGUI::DeckGUI(int _id,
     addAndMakeVisible(volumeSlider);
     addAndMakeVisible(speedSlider);
     addAndMakeVisible(waveformDisplay);
+    addAndMakeVisible(volumeLabel);
+    addAndMakeVisible(speedLabel);
 
     playButton.addListener(this);
     volumeSlider.addListener(this);
@@ -18,6 +20,15 @@ DeckGUI::DeckGUI(int _id,
     speedSlider.setRange(0.5, 1.5);
     volumeSlider.setValue(1.0);
     speedSlider.setValue(1.0);
+
+    volumeLabel.setText("Volume", juce::dontSendNotification);
+    speedLabel.setText("Speed", juce::dontSendNotification);
+
+    volumeLabel.setFont(juce::FontOptions(14.0f));
+    speedLabel.setFont(juce::FontOptions(14.0f));
+
+    volumeLabel.setJustificationType(juce::Justification::centred);
+    speedLabel.setJustificationType(juce::Justification::centred);
 
     formatManager.registerBasicFormats();
 
@@ -84,9 +95,18 @@ void DeckGUI::paint(juce::Graphics& g)
 void DeckGUI::resized()
 {
     auto area = getLocalBounds().reduced(10);
-    playButton.setBounds(area.removeFromTop(40).reduced(5));
-    volumeSlider.setBounds(area.removeFromTop(40).reduced(5));
-    speedSlider.setBounds(area.removeFromTop(40).reduced(5));
+    
+    auto playArea = area.removeFromTop(50);
+    playButton.setBounds(playArea.reduced(5));
+
+    auto volumeArea = area.removeFromTop(60);
+    volumeLabel.setBounds(volumeArea.removeFromTop(20).reduced(5));
+    volumeSlider.setBounds(volumeArea.reduced(5));
+
+    auto speedArea = area.removeFromTop(60);
+    speedLabel.setBounds(speedArea.removeFromTop(20).reduced(5));
+    speedSlider.setBounds(speedArea.reduced(5));
+
     waveformDisplay.setBounds(area.removeFromTop(80).reduced(5));
 }
 
