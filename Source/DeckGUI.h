@@ -4,7 +4,8 @@
 
 class DeckGUI : public juce::Component,
                 public juce::Button::Listener,
-                public juce::Slider::Listener
+                public juce::Slider::Listener,
+                public juce::Timer
 {
 public:
     DeckGUI(int _id,
@@ -35,17 +36,20 @@ private:
     bool playing = false;
     float volume = 1.0f;
     float speed = 1.0f;
+    float currentAngle = 0.0f;
 
     juce::TextButton playButton{"Play"};
     juce::Slider volumeSlider;
     juce::Slider speedSlider;
     juce::Label volumeLabel;
-    juce::Label speedLabel;  
+    juce::Label speedLabel;
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::AudioTransportSource transportSource;
     juce::ResamplingAudioSource resampleSource{&transportSource, false, 2};
     WaveformDisplay waveformDisplay;
+
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeckGUI)
 };

@@ -35,10 +35,13 @@ DeckGUI::DeckGUI(int _id,
     waveformDisplay.onPositionClicked = [this](double position) {
         setTransportPosition(position);
     };
+
+    startTimer(16);
 }
 
 DeckGUI::~DeckGUI()
 {
+    stopTimer();
     transportSource.stop();
     transportSource.releaseResources();
     transportSource.setSource(nullptr);
@@ -83,11 +86,9 @@ void DeckGUI::paint(juce::Graphics& g)
 
     auto center = turntableBounds.getCentre();
     g.saveState();
-    if (playing && transportSource.getTotalLength() > 0)
+    if (transportSource.getTotalLength() > 0)
     {
-        float rotationSpeed = speed * 0.5 * juce::MathConstants<float>::pi;
-        float angle = (transportSource.getCurrentPosition() * rotationSpeed);
-        g.addTransform(juce::AffineTransform::rotation(angle, center.x, center.y));
+        g.addTransform(juce::AffineTransform::rotation(currentAngle, center.x, center.y));
     }
 
     g.setColour(juce::Colours::red);
@@ -160,6 +161,7 @@ void DeckGUI::loadFile(const juce::File& file)
 
     transportSource.setSource(nullptr);
     readerSource.reset();
+    currentAngle = 0.0f;
 
     auto* reader = formatManager.createReaderFor(file);
     if (reader != nullptr)
@@ -193,7 +195,6 @@ void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill
 void DeckGUI::updatePlayhead()
 {
     waveformDisplay.setPosition(transportSource.getCurrentPosition());
-    repaint();
 }
 
 void DeckGUI::releaseResources()
@@ -208,5 +209,15 @@ void DeckGUI::setTransportPosition(double positionInSeconds)
     {
         transportSource.setPosition(positionInSeconds);
         waveformDisplay.setPosition(positionInSeconds);
+    }
+}
+
+void DeckGUI::timerCallback()
+{
+    if (playing && transportSource.getTotalLength() > 0)
+    {
+        float rotationSpeed = 0.5f * juce::MathConstants<float>::pi;
+        currentAngle += rotationSpeed * speed * (16.0f / 1000.0f);
+        repaint();
     }
 }
