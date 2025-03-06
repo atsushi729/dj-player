@@ -81,14 +81,18 @@ void DeckGUI::paint(juce::Graphics& g)
     g.setColour(juce::Colours::red.brighter(0.2f));
     g.drawEllipse(turntableBounds.toFloat(), 5.0f);
 
-    g.setColour(juce::Colours::white);
     auto center = turntableBounds.getCentre();
     g.saveState();
-    if (playing) {
-        float angle = static_cast<float>(juce::Time::getMillisecondCounterHiRes() * 0.001 * speed) * 360.0f;
-        g.addTransform(juce::AffineTransform::rotation(juce::degreesToRadians(angle), center.x, center.y));
+    if (playing && transportSource.getTotalLength() > 0)
+    {
+        float rotationSpeed = speed * 0.5 * juce::MathConstants<float>::pi;
+        float angle = (transportSource.getCurrentPosition() * rotationSpeed);
+        g.addTransform(juce::AffineTransform::rotation(angle, center.x, center.y));
     }
-    g.fillEllipse(center.x - 20, center.y - 20, 40, 40);
+
+    g.setColour(juce::Colours::red);
+    g.drawLine(center.x, center.y, center.x + 80.0f, center.y, 2.0f);
+
     g.restoreState();
 }
 
@@ -189,6 +193,7 @@ void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill
 void DeckGUI::updatePlayhead()
 {
     waveformDisplay.setPosition(transportSource.getCurrentPosition());
+    repaint();
 }
 
 void DeckGUI::releaseResources()
