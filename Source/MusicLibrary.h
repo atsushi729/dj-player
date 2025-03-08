@@ -48,6 +48,17 @@ private:
                               juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
                               "*.mp3;*.wav;*.aiff"};
     
+    // Custom LookAndFeel for crossfader
+    class CrossfaderLookAndFeel : public juce::LookAndFeel_V4
+    {
+    public:
+        void drawLinearSlider(juce::Graphics&, int x, int y, int width, int height,
+                            float sliderPos, float minSliderPos, float maxSliderPos,
+                            const juce::Slider::SliderStyle, juce::Slider&) override;
+    };
+    
+    CrossfaderLookAndFeel crossfaderLookAndFeel;
+
     void loadLibrary();
     void saveLibrary();
     

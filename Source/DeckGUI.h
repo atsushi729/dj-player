@@ -49,6 +49,17 @@ private:
     juce::ResamplingAudioSource resampleSource{&transportSource, false, 2};
     WaveformDisplay waveformDisplay;
 
+    // Custom LookAndFeel for sliders
+    class SliderLookAndFeel : public juce::LookAndFeel_V4
+    {
+    public:
+        void drawLinearSlider(juce::Graphics&, int x, int y, int width, int height,
+                            float sliderPos, float minSliderPos, float maxSliderPos,
+                            const juce::Slider::SliderStyle, juce::Slider&) override;
+    };
+    
+    SliderLookAndFeel sliderLookAndFeel;
+
     void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeckGUI)

@@ -1,5 +1,33 @@
 #include "DeckGUI.h"
 
+// Custom LookAndFeel implementation
+void DeckGUI::SliderLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
+                                                float sliderPos, float minSliderPos, float maxSliderPos,
+                                                const juce::Slider::SliderStyle, juce::Slider& slider)
+{
+    // Black track background
+    auto trackBounds = juce::Rectangle<float>(x, y + height * 0.4f, width, height * 0.2f);
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(trackBounds, 2.0f);
+
+    // Draw tick marks
+    g.setColour(juce::Colours::grey.darker(0.5f));
+    for (int i = 0; i <= 10; ++i)
+    {
+        float tickX = x + (width * i / 10.0f);
+        g.drawVerticalLine(static_cast<int>(tickX), trackBounds.getY() - 5, trackBounds.getBottom() + 5);
+    }
+
+    // Thumb (Rectangle)
+    auto thumbWidth = 12.0f;
+    auto thumbHeight = 20.0f;
+    auto thumbBounds = juce::Rectangle<float>(sliderPos - thumbWidth / 2, y + (height - thumbHeight) / 2, thumbWidth, thumbHeight);
+    g.setColour(juce::Colours::orange);
+    g.fillRect(thumbBounds);
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.drawRect(thumbBounds, 1.0f);
+}
+
 DeckGUI::DeckGUI(int _id,
                  juce::AudioFormatManager& formatManagerToUse,
                  juce::AudioThumbnailCache& cacheToUse)
@@ -21,6 +49,15 @@ DeckGUI::DeckGUI(int _id,
     volumeSlider.setValue(1.0);
     speedSlider.setValue(1.0);
 
+    volumeSlider.setLookAndFeel(&sliderLookAndFeel);
+    speedSlider.setLookAndFeel(&sliderLookAndFeel);
+
+    volumeSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+    speedSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+    
+    volumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    speedSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+
     volumeLabel.setText("Volume", juce::dontSendNotification);
     speedLabel.setText("Speed", juce::dontSendNotification);
 
@@ -41,6 +78,8 @@ DeckGUI::DeckGUI(int _id,
 
 DeckGUI::~DeckGUI()
 {
+    volumeSlider.setLookAndFeel(nullptr);
+    speedSlider.setLookAndFeel(nullptr);
     stopTimer();
     transportSource.stop();
     transportSource.releaseResources();

@@ -1,6 +1,34 @@
 #include "MusicLibrary.h"
 #include "DeckGUI.h"
 
+// Custom LookAndFeel for crossfader
+void MusicLibrary::CrossfaderLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
+                                                         float sliderPos, float minSliderPos, float maxSliderPos,
+                                                         const juce::Slider::SliderStyle, juce::Slider& slider)
+{
+    // Black track background
+    auto trackBounds = juce::Rectangle<float>(x, y + height * 0.4f, width, height * 0.2f);
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(trackBounds, 2.0f);
+
+    // Draw tick marks
+    g.setColour(juce::Colours::grey.darker(0.5f));
+    for (int i = 0; i <= 10; ++i)
+    {
+        float tickX = x + (width * i / 10.0f);
+        g.drawVerticalLine(static_cast<int>(tickX), trackBounds.getY() - 5, trackBounds.getBottom() + 5);
+    }
+
+    // Thumb (Rectangle)
+    auto thumbWidth = 12.0f;
+    auto thumbHeight = 20.0f;
+    auto thumbBounds = juce::Rectangle<float>(sliderPos - thumbWidth / 2, y + (height - thumbHeight) / 2, thumbWidth, thumbHeight);
+    g.setColour(juce::Colours::orange);
+    g.fillRect(thumbBounds);
+    g.setColour(juce::Colours::black.withAlpha(0.3f));
+    g.drawRect(thumbBounds, 1.0f);
+}
+
 MusicLibrary::MusicLibrary()
 {
     addAndMakeVisible(searchBox);
@@ -25,6 +53,7 @@ MusicLibrary::MusicLibrary()
     
     crossfaderSlider.setRange(0.0, 1.0);
     crossfaderSlider.setValue(0.5);
+    crossfaderSlider.setLookAndFeel(&crossfaderLookAndFeel);
     crossfaderSlider.setSliderStyle(juce::Slider::LinearHorizontal);
     crossfaderSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     
@@ -39,6 +68,7 @@ MusicLibrary::MusicLibrary()
 
 MusicLibrary::~MusicLibrary()
 {
+    crossfaderSlider.setLookAndFeel(nullptr);
     saveLibrary();
 }
 
