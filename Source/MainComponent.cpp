@@ -1,17 +1,25 @@
+/*
+  ==============================================================================
+
+    This file contains the implementation of the MainComponent class for a JUCE application,
+    serving as the top-level component managing audio decks and music library.
+
+  ==============================================================================
+*/
+
 #include "MainComponent.h"
 
+// Constructor: Set up UI components and audio channels
 MainComponent::MainComponent()
 {
     addAndMakeVisible(deck1);
     addAndMakeVisible(deck2);
     addAndMakeVisible(musicLib);
     
-    // Add this line to set the deck pointers
-    musicLib.setDecks(&deck1, &deck2);
+    musicLib.setDecks(&deck1, &deck2); // Link music library to decks
     
     setSize(800, 600);
-    setAudioChannels(0, 2);
-    
+    setAudioChannels(0, 2); // Stereo output
     formatManager.registerBasicFormats();
 }
 
@@ -20,12 +28,14 @@ MainComponent::~MainComponent()
     shutdownAudio();
 }
 
+// Prepare audio processing for decks
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     deck1.prepareToPlay(samplesPerBlockExpected, sampleRate);
     deck2.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
+// Mix audio from both decks into output buffer
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     juce::AudioBuffer<float> tempBuffer(2, bufferToFill.numSamples);
@@ -43,15 +53,16 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     bufferToFill.buffer->copyFrom(1, 0, tempBuffer.getReadPointer(1), bufferToFill.numSamples);
 }
 
+// Free up audio resources for both decks
 void MainComponent::releaseResources()
 {
     deck1.releaseResources();
     deck2.releaseResources();
 }
 
+// Draw radial gradient background
 void MainComponent::paint(juce::Graphics& g)
 {
-    // Subtle radial gradient for a modern, centered focus
     juce::ColourGradient bgGradient(
         juce::Colours::darkgrey.darker(0.8f), getWidth() / 2.0f, getHeight() / 2.0f,
         juce::Colours::darkgrey.brighter(0.2f), 0, 0,
@@ -64,19 +75,16 @@ void MainComponent::paint(juce::Graphics& g)
     g.drawRect(getLocalBounds().toFloat(), 1.0f);
 }
 
+// Layout components: Decks on sides, music library in center
 void MainComponent::resized()
 {
-    auto area = getLocalBounds().reduced(10); // Padding around edges
-    
-    // Main content area: Deck1 (left), MusicLibrary (center), Deck2 (right)
+    auto area = getLocalBounds().reduced(10);
     auto contentArea = area;
     int totalWidth = contentArea.getWidth();
     
-    // Allocate 30% for each deck, 40% for music library
     int deckWidth = totalWidth * 0.3f;
     int libraryWidth = totalWidth * 0.4f;
     
-    // Calculate starting x-coordinate for MusicLibrary to center it
     int libraryX = (totalWidth - libraryWidth) / 2 + contentArea.getX();
     
     deck1.setBounds(contentArea.getX(), contentArea.getY(), deckWidth, contentArea.getHeight());

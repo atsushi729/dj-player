@@ -1,10 +1,22 @@
+/*
+  ==============================================================================
+
+    This file defines the MainComponent class for a JUCE application,
+    acting as the main container for decks and music library components.
+
+  ==============================================================================
+*/
+
 #pragma once
 #include <JuceHeader.h>
 #include "DeckGUI.h"
 #include "MusicLibrary.h"
 
+// MainComponent: Top-level component managing decks and library
 class MainComponent  : public juce::AudioAppComponent
 {
+    
+//==============================================================================
 public:
     MainComponent();
     ~MainComponent() override;
@@ -15,7 +27,8 @@ public:
 
     void paint(juce::Graphics& g) override;
     void resized() override;
-
+    
+//==============================================================================
 private:
     juce::AudioFormatManager formatManager;
     juce::AudioThumbnailCache thumCache{100};

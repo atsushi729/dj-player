@@ -1,13 +1,24 @@
+/*
+  ==============================================================================
+
+    This file defines the MusicLibrary class for a JUCE application,
+    managing a track list, search functionality, and crossfader controls.
+
+  ==============================================================================
+*/
+
 #pragma once
 #include <JuceHeader.h>
 
 class DeckGUI;  // Forward declaration
 
+// MusicLibrary: Manages track list and crossfader
 class MusicLibrary : public juce::Component,
                      public juce::TextEditor::Listener,
                      public juce::ListBoxModel,
                      public juce::Slider::Listener
 {
+//==============================================================================
 public:
     MusicLibrary();
     ~MusicLibrary() override;
@@ -17,7 +28,7 @@ public:
     void textEditorTextChanged(juce::TextEditor&) override;
     void sliderValueChanged(juce::Slider* slider) override;
 
-    // ListBoxModel methods
+    // ListBoxModel: Manage track list display
     int getNumRows() override;
     void paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected) override;
     void listBoxItemClicked(int row, const juce::MouseEvent&) override;
@@ -25,8 +36,9 @@ public:
     juce::File getSelectedTrack();
     void addTrack(const juce::File& file);
     
-    void setDecks(DeckGUI* deck1, DeckGUI* deck2);
-
+    void setDecks(DeckGUI* deck1, DeckGUI* deck2); // Link to decks for loading tracks
+    
+//==============================================================================
 private:
     juce::TextEditor searchBox;
     juce::ListBox trackList;
@@ -39,7 +51,7 @@ private:
     juce::TextButton rightArrowButton{">"};
     
     juce::Slider crossfaderSlider;
-    juce::Label crossfaderLabel;  // Label for crossfader
+    juce::Label crossfaderLabel;
     
     DeckGUI* deck1Ptr{nullptr};
     DeckGUI* deck2Ptr{nullptr};
@@ -48,7 +60,6 @@ private:
                               juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
                               "*.mp3;*.wav;*.aiff"};
     
-    // Custom LookAndFeel for crossfader
     class CrossfaderLookAndFeel : public juce::LookAndFeel_V4
     {
     public:
@@ -59,13 +70,13 @@ private:
     
     CrossfaderLookAndFeel crossfaderLookAndFeel;
 
-    void loadLibrary();
-    void saveLibrary();
+    void loadLibrary(); // Load tracks from XML file
+    void saveLibrary(); // Save tracks to XML file
     
-    void leftArrowClicked();
-    void rightArrowClicked();
-    void addButtonClicked();
-    void deleteButtonClicked();
+    void leftArrowClicked();  // Load track to Deck 1
+    void rightArrowClicked(); // Load track to Deck 2
+    void addButtonClicked();  // Open file chooser to add track
+    void deleteButtonClicked(); // Remove selected track
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MusicLibrary)
 };

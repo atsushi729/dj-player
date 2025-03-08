@@ -1,16 +1,23 @@
+/*
+  ==============================================================================
+
+    This file contains the implementation of the DeckGUI class for a JUCE application,
+    managing audio playback, UI controls, and turntable visualization for a deck.
+
+  ==============================================================================
+*/
+
 #include "DeckGUI.h"
 
-// Custom LookAndFeel implementation
+// Custom slider appearance
 void DeckGUI::SliderLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
                                                 float sliderPos, float minSliderPos, float maxSliderPos,
                                                 const juce::Slider::SliderStyle, juce::Slider& slider)
 {
-    // Black track background
     auto trackBounds = juce::Rectangle<float>(x, y + height * 0.4f, width, height * 0.2f);
     g.setColour(juce::Colours::black);
     g.fillRoundedRectangle(trackBounds, 2.0f);
 
-    // Draw tick marks
     g.setColour(juce::Colours::grey.darker(0.5f));
     for (int i = 0; i <= 10; ++i)
     {
@@ -18,7 +25,6 @@ void DeckGUI::SliderLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int 
         g.drawVerticalLine(static_cast<int>(tickX), trackBounds.getY() - 5, trackBounds.getBottom() + 5);
     }
 
-    // Thumb (Rectangle)
     auto thumbWidth = 12.0f;
     auto thumbHeight = 20.0f;
     auto thumbBounds = juce::Rectangle<float>(sliderPos - thumbWidth / 2, y + (height - thumbHeight) / 2, thumbWidth, thumbHeight);
@@ -28,6 +34,7 @@ void DeckGUI::SliderLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int 
     g.drawRect(thumbBounds, 1.0f);
 }
 
+// Constructor: Set up UI and audio components
 DeckGUI::DeckGUI(int _id,
                  juce::AudioFormatManager& formatManagerToUse,
                  juce::AudioThumbnailCache& cacheToUse)
@@ -70,10 +77,10 @@ DeckGUI::DeckGUI(int _id,
     formatManager.registerBasicFormats();
 
     waveformDisplay.onPositionClicked = [this](double position) {
-        setTransportPosition(position);
+        setTransportPosition(position); // Link waveform click to transport
     };
 
-    startTimer(16);
+    startTimer(16); // 60 FPS for turntable animation
 }
 
 DeckGUI::~DeckGUI()
@@ -87,6 +94,7 @@ DeckGUI::~DeckGUI()
     readerSource.reset();
 }
 
+// Draw deck UI with animated turntable
 void DeckGUI::paint(juce::Graphics& g)
 {
     juce::ColourGradient bgGradient(
@@ -136,6 +144,7 @@ void DeckGUI::paint(juce::Graphics& g)
     g.restoreState();
 }
 
+// Arrange deck UI components (play button, volume/speed controls, waveform) vertically
 void DeckGUI::resized()
 {
     auto area = getLocalBounds().reduced(10);
@@ -154,6 +163,7 @@ void DeckGUI::resized()
     waveformDisplay.setBounds(area.removeFromTop(80).reduced(5));
 }
 
+// Toggle play/stop state
 void DeckGUI::buttonClicked(juce::Button* button)
 {
     if (button == &playButton)
@@ -171,6 +181,7 @@ void DeckGUI::buttonClicked(juce::Button* button)
     }
 }
 
+// Update volume or speed based on slider
 void DeckGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)
@@ -180,10 +191,11 @@ void DeckGUI::sliderValueChanged(juce::Slider* slider)
     else if (slider == &speedSlider)
     {
         speed = static_cast<float>(slider->getValue());
-        resampleSource.setResamplingRatio(speed);
+        resampleSource.setResamplingRatio(speed); // Adjust playback speed
     }
 }
 
+// Load audio file into transport and waveform
 void DeckGUI::loadFile(const juce::File& file)
 {
     if (!file.existsAsFile())
@@ -218,39 +230,44 @@ void DeckGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     resampleSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
+// Fill the audio buffer with the next block of samples from the resampler if playing
 void DeckGUI::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     if (playing && readerSource != nullptr)
     {
         resampleSource.getNextAudioBlock(bufferToFill);
-        juce::MessageManager::callAsync([this]() { updatePlayhead(); });
+        juce::MessageManager::callAsync([this]() { updatePlayhead(); }); // Async update of playhead
     }
     else
     {
-        bufferToFill.clearActiveBufferRegion();
+        bufferToFill.clearActiveBufferRegion(); // Clear buffer if not playing
     }
 }
 
+// Sync the waveform display’s playhead with the current transport position
 void DeckGUI::updatePlayhead()
 {
     waveformDisplay.setPosition(transportSource.getCurrentPosition());
 }
 
+// Release audio resources held by the transport and resampler
 void DeckGUI::releaseResources()
 {
     transportSource.releaseResources();
     resampleSource.releaseResources();
 }
 
+// Set the playback position in the transport and update the waveform display
 void DeckGUI::setTransportPosition(double positionInSeconds)
 {
     if (readerSource != nullptr)
     {
         transportSource.setPosition(positionInSeconds);
-        waveformDisplay.setPosition(positionInSeconds);
+        waveformDisplay.setPosition(positionInSeconds); // Keep waveform in sync
     }
 }
 
+// Animate turntable rotation
 void DeckGUI::timerCallback()
 {
     if (playing && transportSource.getTotalLength() > 0)

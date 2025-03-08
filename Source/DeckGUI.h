@@ -1,12 +1,23 @@
+/*
+  ==============================================================================
+
+    This file defines the DeckGUI class for a JUCE application,
+    handling audio playback controls and UI for a single deck.
+
+  ==============================================================================
+*/
+
 #pragma once
 #include <JuceHeader.h>
 #include "WaveformDisplay.h"
 
+// DeckGUI: Controls audio playback and UI for a single deck
 class DeckGUI : public juce::Component,
                 public juce::Button::Listener,
                 public juce::Slider::Listener,
                 public juce::Timer
 {
+//==============================================================================
 public:
     DeckGUI(int _id,
             juce::AudioFormatManager& formatManagerToUse,
@@ -18,9 +29,10 @@ public:
     void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(juce::Slider* slider) override;
 
-    void loadFile(const juce::File& file);
+    void loadFile(const juce::File& file); // Load audio file into deck
     bool isPlaying() { return playing; }
     
+    // Audio processing methods
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     void releaseResources();
@@ -28,9 +40,10 @@ public:
     float& getVolume() { return volume; }
     double getPosition() const { return transportSource.getCurrentPosition(); }
 
-    void updatePlayhead();
-    void setTransportPosition(double positionInSeconds);
+    void updatePlayhead(); // Sync waveform playhead with transport
+    void setTransportPosition(double positionInSeconds); // Set playback position
 
+//==============================================================================
 private:
     int id;
     bool playing = false;
@@ -49,7 +62,6 @@ private:
     juce::ResamplingAudioSource resampleSource{&transportSource, false, 2};
     WaveformDisplay waveformDisplay;
 
-    // Custom LookAndFeel for sliders
     class SliderLookAndFeel : public juce::LookAndFeel_V4
     {
     public:
@@ -60,7 +72,7 @@ private:
     
     SliderLookAndFeel sliderLookAndFeel;
 
-    void timerCallback() override;
+    void timerCallback() override; // Update turntable animation
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeckGUI)
 };

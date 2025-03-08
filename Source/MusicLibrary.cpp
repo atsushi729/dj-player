@@ -1,17 +1,24 @@
+/*
+  ==============================================================================
+
+    This file contains the implementation of the MusicLibrary class for a JUCE application,
+    handling track management, search, and crossfader functionality.
+
+  ==============================================================================
+*/
+
 #include "MusicLibrary.h"
 #include "DeckGUI.h"
 
-// Custom LookAndFeel for crossfader
+// Custom crossfader appearance
 void MusicLibrary::CrossfaderLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
                                                          float sliderPos, float minSliderPos, float maxSliderPos,
                                                          const juce::Slider::SliderStyle, juce::Slider& slider)
 {
-    // Black track background
     auto trackBounds = juce::Rectangle<float>(x, y + height * 0.4f, width, height * 0.2f);
     g.setColour(juce::Colours::black);
     g.fillRoundedRectangle(trackBounds, 2.0f);
 
-    // Draw tick marks
     g.setColour(juce::Colours::grey.darker(0.5f));
     for (int i = 0; i <= 10; ++i)
     {
@@ -19,7 +26,6 @@ void MusicLibrary::CrossfaderLookAndFeel::drawLinearSlider(juce::Graphics& g, in
         g.drawVerticalLine(static_cast<int>(tickX), trackBounds.getY() - 5, trackBounds.getBottom() + 5);
     }
 
-    // Thumb (Rectangle)
     auto thumbWidth = 12.0f;
     auto thumbHeight = 20.0f;
     auto thumbBounds = juce::Rectangle<float>(sliderPos - thumbWidth / 2, y + (height - thumbHeight) / 2, thumbWidth, thumbHeight);
@@ -29,6 +35,7 @@ void MusicLibrary::CrossfaderLookAndFeel::drawLinearSlider(juce::Graphics& g, in
     g.drawRect(thumbBounds, 1.0f);
 }
 
+// Constructor: Initialize UI components
 MusicLibrary::MusicLibrary()
 {
     addAndMakeVisible(searchBox);
@@ -69,9 +76,10 @@ MusicLibrary::MusicLibrary()
 MusicLibrary::~MusicLibrary()
 {
     crossfaderSlider.setLookAndFeel(nullptr);
-    saveLibrary();
+    saveLibrary(); // Persist library on shutdown
 }
 
+// Draw the music library UI with a gradient background and rounded borders
 void MusicLibrary::paint(juce::Graphics& g)
 {
     juce::ColourGradient gradient(
@@ -89,6 +97,7 @@ void MusicLibrary::paint(juce::Graphics& g)
     g.drawRoundedRectangle(getLocalBounds().toFloat(), 12.0f, 1.5f);
 }
 
+// Arrange UI components (search box, buttons, crossfader, track list) within the library
 void MusicLibrary::resized()
 {
     auto area = getLocalBounds().reduced(5);
@@ -108,11 +117,13 @@ void MusicLibrary::resized()
     trackList.setBounds(area);
 }
 
+// Update track list display when search text changes
 void MusicLibrary::textEditorTextChanged(juce::TextEditor&)
 {
-    trackList.updateContent();
+    trackList.updateContent(); // Refresh list on search input
 }
 
+// Adjust deck volumes based on crossfader position
 void MusicLibrary::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &crossfaderSlider && deck1Ptr != nullptr && deck2Ptr != nullptr)
@@ -123,6 +134,7 @@ void MusicLibrary::sliderValueChanged(juce::Slider* slider)
     }
 }
 
+// Count visible rows based on search filter
 int MusicLibrary::getNumRows()
 {
     auto searchText = searchBox.getText().toLowerCase();
@@ -136,6 +148,7 @@ int MusicLibrary::getNumRows()
     return count;
 }
 
+// Draw a single track item in the list box, applying search filter and selection styling
 void MusicLibrary::paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected)
 {
     auto searchText = searchBox.getText().toLowerCase();
@@ -158,11 +171,13 @@ void MusicLibrary::paintListBoxItem(int rowNumber, juce::Graphics& g, int width,
     }
 }
 
+// Handle track selection when a list box item is clicked
 void MusicLibrary::listBoxItemClicked(int row, const juce::MouseEvent&)
 {
     trackList.selectRow(row);
 }
 
+// Get file of selected track, accounting for search filter
 juce::File MusicLibrary::getSelectedTrack()
 {
     int row = trackList.getSelectedRow();
@@ -183,15 +198,17 @@ juce::File MusicLibrary::getSelectedTrack()
     return juce::File();
 }
 
+// Add a new track to the library if it exists and isn’t already present
 void MusicLibrary::addTrack(const juce::File& file)
 {
     if (file.existsAsFile() && !tracks.contains(file))
     {
         tracks.add(file);
-        trackList.updateContent();
+        trackList.updateContent(); // Refresh the track list display
     }
 }
 
+// Load track list from XML file
 void MusicLibrary::loadLibrary()
 {
     tracks.clear();
@@ -216,6 +233,7 @@ void MusicLibrary::loadLibrary()
     trackList.updateContent();
 }
 
+// Save track list to XML file
 void MusicLibrary::saveLibrary()
 {
     juce::XmlElement xml("MusicLibrary");
@@ -232,6 +250,7 @@ void MusicLibrary::saveLibrary()
     }
 }
 
+// Link the music library to two decks and initialize their volumes
 void MusicLibrary::setDecks(DeckGUI* deck1, DeckGUI* deck2)
 {
     deck1Ptr = deck1;
@@ -239,10 +258,11 @@ void MusicLibrary::setDecks(DeckGUI* deck1, DeckGUI* deck2)
     if (deck1Ptr && deck2Ptr)
     {
         deck1Ptr->getVolume() = 0.5f;
-        deck2Ptr->getVolume() = 0.5f;
+        deck2Ptr->getVolume() = 0.5f; // Balance volumes initially
     }
 }
 
+// Load the selected track into Deck 1 when the left arrow is clicked
 void MusicLibrary::leftArrowClicked()
 {
     juce::File selectedTrack = getSelectedTrack();
@@ -252,6 +272,7 @@ void MusicLibrary::leftArrowClicked()
     }
 }
 
+// Load the selected track into Deck 2 when the right arrow is clicked
 void MusicLibrary::rightArrowClicked()
 {
     juce::File selectedTrack = getSelectedTrack();
@@ -261,6 +282,7 @@ void MusicLibrary::rightArrowClicked()
     }
 }
 
+// Open file chooser to add new track
 void MusicLibrary::addButtonClicked()
 {
     auto fileChooserFlags = juce::FileBrowserComponent::canSelectFiles;
@@ -275,6 +297,7 @@ void MusicLibrary::addButtonClicked()
     });
 }
 
+// Remove selected track from list
 void MusicLibrary::deleteButtonClicked()
 {
     int selectedRow = trackList.getSelectedRow();
