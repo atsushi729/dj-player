@@ -43,11 +43,15 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
 
     deck1.getNextAudioBlock(bufferToFill);
     for (int ch = 0; ch < 2; ++ch)
+    {
         tempBuffer.addFrom(ch, 0, *bufferToFill.buffer, ch, 0, bufferToFill.numSamples, deck1.getVolume());
+    }
 
     deck2.getNextAudioBlock(bufferToFill);
     for (int ch = 0; ch < 2; ++ch)
+    {
         tempBuffer.addFrom(ch, 0, *bufferToFill.buffer, ch, 0, bufferToFill.numSamples, deck2.getVolume());
+    }
 
     bufferToFill.buffer->copyFrom(0, 0, tempBuffer.getReadPointer(0), bufferToFill.numSamples);
     bufferToFill.buffer->copyFrom(1, 0, tempBuffer.getReadPointer(1), bufferToFill.numSamples);

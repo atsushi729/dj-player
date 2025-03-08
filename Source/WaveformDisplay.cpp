@@ -134,7 +134,10 @@ void WaveformDisplay::drawWaveform(juce::Graphics& g)
 // Draw playhead with marker triangle
 void WaveformDisplay::drawPlayhead(juce::Graphics& g)
 {
-    if (audioThumb.getTotalLength() <= 0) return;
+    if (audioThumb.getTotalLength() <= 0)
+    {
+        return;
+    }
 
     float playheadX = (playheadPosition / audioThumb.getTotalLength()) * getWidth();
     
@@ -153,7 +156,10 @@ void WaveformDisplay::drawPlayhead(juce::Graphics& g)
 // Draw hover line and time text
 void WaveformDisplay::drawHoverIndicator(juce::Graphics& g)
 {
-    if (hoverPosition < 0 || audioThumb.getTotalLength() <= 0) return;
+    if (hoverPosition < 0 || audioThumb.getTotalLength() <= 0)
+    {
+        return;
+    }
 
     float hoverX = (hoverPosition / audioThumb.getTotalLength()) * getWidth();
     

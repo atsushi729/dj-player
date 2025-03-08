@@ -191,7 +191,9 @@ juce::File MusicLibrary::getSelectedTrack()
         if (searchText.isEmpty() || tracks[i].getFileName().toLowerCase().contains(searchText))
         {
             if (visibleRow == row)
+            {
                 return tracks[i];
+            }
             visibleRow++;
         }
     }
@@ -225,7 +227,9 @@ void MusicLibrary::loadLibrary()
                     juce::String path = element->getStringAttribute("path");
                     juce::File trackFile(path);
                     if (trackFile.existsAsFile())
+                    {
                         tracks.add(trackFile);
+                    }
                 }
             }
         }
